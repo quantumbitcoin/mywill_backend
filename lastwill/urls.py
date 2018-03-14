@@ -24,7 +24,7 @@ from lastwill.main.views import index, balance, login, eth2rub, exc_rate
 from lastwill.profile.views import UserConfirmEmailView, profile_view, generate_key, enable_2fa, disable_2fa
 from lastwill.contracts.api import ContractViewSet, get_cost, get_code, test_comp, get_contract_types, pizza_delivered, deploy, get_token_contracts
 from lastwill.other.api import SentenceViewSet
-from lastwill.social.views import FacebookLogin, GoogleLogin, MyView
+from lastwill.social.views import FacebookLogin, GoogleLogin
 
 router = DefaultRouter(trailing_slash=True)
 router.register(r'contracts', ContractViewSet)
@@ -61,7 +61,7 @@ urlpatterns = [
     url(r'^api/rest-auth/facebook/$', FacebookLogin.as_view(), name='fb_login'),
     url(r'^api/rest-auth/google/$', GoogleLogin.as_view(), name='google_login'),
     url(r'^/$', index, name='socialaccount_signup'),
-    url(r'^test/$', MyView.as_view(), name='test')
+    # url(r'^test/$', MyView.as_view(), name='test')
 ]
 
 urlpatterns += url(r'^/*', index, name='all'),
