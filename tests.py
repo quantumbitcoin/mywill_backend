@@ -213,8 +213,9 @@ class TestReceiver(unittest.TestCase):
             'address': 'sdjfn;kjdxxbddldjbslkjdbs'
                         }
         checked(test_message)
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=timezone.utc)
         print('last_check', test_details.last_check)
+        test_details = ContractDetailsLostKey.objects.get(id=test_details.id)
         assert(test_details.last_check < now)
 
     def test_initialized(self):

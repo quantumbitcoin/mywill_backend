@@ -290,7 +290,6 @@ class ContractDetailsLastwill(CommonDetails):
             self.next_check = None
         self.save()
 
-    @check_transaction
     def triggered(self, message):
         self.last_check = timezone.now()
         self.next_check = None
@@ -363,7 +362,6 @@ class ContractDetailsLostKey(CommonDetails):
             self.next_check = None
         self.save()
 
-    @check_transaction
     def triggered(self, message):
         self.last_check = timezone.now()
         self.next_check = None
