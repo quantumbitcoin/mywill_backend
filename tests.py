@@ -1,9 +1,11 @@
 import unittest
+import datetime
 
 from receiver import *
 from django.contrib.auth.models import User
 from lastwill.profile.models import Profile
-from lastwill.contracts.models import EthContract, Contract
+from lastwill.contracts.serializers import ContractSerializer
+from lastwill.contracts.models import EthContract, Contract, ContractDetailsLostKey
 
 
 class TestReceiver(unittest.TestCase):
@@ -66,15 +68,26 @@ class TestReceiver(unittest.TestCase):
         test_base_contract = Contract(
             name='sdvsdvdddasdvfdsv', address='dfasdfdfdvsvafva', cost=10,
             owner_address='dfcasdfdfdfdfcvs', user_address='jlhgkgfgfgdfgv',
-            user_id=test_user.id
+            user_id=test_user.id, contract_type=1
         )
         test_base_contract.save()
+        # base_contract=Contract.objects.all().first()
+        # test_common_details = CommonDetails(contract_id=test_base_contract.id)
+        # test_common_details.save()
 
         test_ethcontract = EthContract(
             address='hjbwdaddsjvjmv',
             contract=test_base_contract
         )
         test_ethcontract.save()
+        test_details = ContractDetailsLostKey(
+            user_address='dfasdfdfdvsvafva',
+            eth_contract=test_ethcontract,
+            check_interval=100,
+            active_to=datetime.date.today(),
+            contract_id=test_ethcontract.id
+        )
+        test_details.save()
         test_contract = EthContract.objects.get(id=test_ethcontract.id)
         test_message = {'contractId': test_contract.id}
         triggered(test_message)
@@ -92,9 +105,12 @@ class TestReceiver(unittest.TestCase):
         test_base_contract = Contract(
             name='sdvsdvdddasdvfdsv', address='dfasdfdfdvsvafva', cost=10,
             owner_address='dfcasdfdfdfdfcvs', user_address='jlhgkgfgfgdfgv',
-            user_id=test_user.id
+            user_id=test_user.id, contract_type=1
         )
         test_base_contract.save()
+
+        # test_common_details = CommonDetails(contract_id=test_base_contract.id)
+        # test_common_details.save()
 
         test_ethcontract = EthContract(
             address='hjbwdaddsjvjmv',
@@ -102,6 +118,14 @@ class TestReceiver(unittest.TestCase):
         )
         test_ethcontract.save()
         test_contract = EthContract.objects.get(id=test_ethcontract.id)
+        test_details = ContractDetailsLostKey(
+            user_address='dfasdfdfdvsvafva',
+            eth_contract=test_ethcontract,
+            check_interval=100,
+            active_to=datetime.date.today(),
+            contract_id=test_ethcontract.id
+        )
+        test_details.save()
         test_message = {
             'contractId': test_contract.id,
             'address': 'sdjfn;kjdbldjbslkjdbs'
@@ -121,9 +145,12 @@ class TestReceiver(unittest.TestCase):
         test_base_contract = Contract(
             name='sdvsdvdddasdsgvfv', address='dfafdfdvsvafva', cost=10,
             owner_address='dfcasdfdfdvs', user_address='jlfgfgdfgv',
-            user_id=test_user.id
+            user_id=test_user.id, contract_type=1
         )
         test_base_contract.save()
+
+        # test_common_details = CommonDetails(contract_id=test_base_contract.id)
+        # test_common_details.save()
 
         test_ethcontract = EthContract(
             address='hjbwdaddsjfddfvjmv',
@@ -131,6 +158,14 @@ class TestReceiver(unittest.TestCase):
         )
         test_ethcontract.save()
         test_contract = EthContract.objects.get(id=test_ethcontract.id)
+        test_details = ContractDetailsLostKey(
+            user_address='dfasdfdfdvsvafva',
+            eth_contract=test_ethcontract,
+            check_interval=100,
+            active_to=datetime.date.today(),
+            contract_id=test_ethcontract.id
+        )
+        test_details.save()
         test_message = {
             'contractId': test_contract.id,
             'address': 'sdjfn;kjdbddldjbslkjdbs'
