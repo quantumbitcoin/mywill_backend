@@ -160,11 +160,11 @@ rabbitmqctl add_user java java
 rabbitmqctl add_vhost mywill
 rabbitmqctl set_permissions -p mywill java ".*" ".*" ".*"
 """
+if __name__ == "__main__":
+    channel = connection.channel()
+    channel.queue_declare(queue=MESSAGE_QUEUE, durable=True, auto_delete=False, exclusive=False)
+    channel.basic_consume(callback, queue=MESSAGE_QUEUE)
 
-channel = connection.channel()
-channel.queue_declare(queue=MESSAGE_QUEUE, durable=True, auto_delete=False, exclusive=False)
-channel.basic_consume(callback, queue=MESSAGE_QUEUE)
+    print('receiver started', flush=True)
 
-print('receiver started', flush=True)
-
-channel.start_consuming()
+    channel.start_consuming()
