@@ -226,21 +226,33 @@ class TestReceiver(unittest.TestCase):
         )
         test_user.save()
 
-        test_base_contract = Contract(
+        test_token_contract = Contract(
             name='sdvsdvdddasdhhvfdsv', address='dfasdfdfhhdvsvafva', cost=10,
             owner_address='dfcasdfdfdfdfcvs', user_address='jlhgkgfgfgdfgv',
-            user_id=test_user.id, contract_type=1
+            user_id=test_user.id
         )
-        test_base_contract.save()
-        # base_contract=Contract.objects.all().first()
-        # test_common_details = CommonDetails(contract_id=test_base_contract.id)
-        # test_common_details.save()
+        test_token_contract.save()
 
-        test_ethcontract = EthContract(
+        test_token_ethcontract = EthContract(
             address='hjbwdaddsjggvjmv',
-            contract=test_base_contract
+            contract=test_token_contract
         )
-        test_ethcontract.save()
+        test_token_ethcontract.save()
+
+        test_crowdsale_contract = Contract(
+            name='sdvsdvdddasdhhvfdsv', address='dfasdfdfhhdvsvafva', cost=10,
+            owner_address='dfcasdfdfdfdfcvs', user_address='jlhgkgfgfgdfgv',
+            user_id=test_user.id
+        )
+        test_crowdsale_contract.save()
+
+        test_crowdsale_ethcontract = EthContract(
+            address='hjbwdaddsjggvjmv',
+            contract=test_token_contract
+        )
+        test_crowdsale_ethcontract.save()
+
+
         test_details = ContractDetailsICO(
             token_name='dffsvscv',
             token_short_name='kk',
@@ -249,57 +261,78 @@ class TestReceiver(unittest.TestCase):
             decimals=22,
             start_date=100,
             stop_date=1100,
-            contract_id=1,
-            eth_contract_token_id=test_ethcontract.id,
-            eth_contract_crowdsale_id=test_ethcontract.id
+            contract_id=test_token_ethcontract.id,
+            eth_contract_token_id=test_token_ethcontract.id,
+            eth_contract_crowdsale_id=test_crowdsale_ethcontract.id
         )
         test_details.save()
-        test_contract = EthContract.objects.get(id=test_ethcontract.id)
-        test_message = {'contractId': test_contract.id}
+
+        test_message = {
+            'contractId': test_token_contract.id,
+            'crowdsaleId': test_crowdsale_ethcontract.id
+        }
+
+        ownershipTransferred(test_message)
+
         initialized(test_message)
-        result_contract = EthContract.objects.get(id=test_contract.id)
+        result_contract = EthContract.objects.get(id=test_token_contract.id)
         self.assertEqual(result_contract.contract.state, 'ACTIVE')
 
     def test_finalized(self):
         test_user = User(
-            email='no1M1@no.no',
-            username='fMfff',
-            password='ffMffff'
+            email='nno1551@no.no',
+            username='f55fhhff',
+            password='ff55hhffff'
         )
         test_user.save()
 
-        test_base_contract = Contract(
-            name='sdvsdvdbddasdvfdsv', address='dfasdfdfdvsvafva', cost=10,
-            owner_address='dbfcasdfdfdfdfcvs', user_address='jlhgkgfgfgdfgv',
+        test_token_contract = Contract(
+            name='sdvsdv55555hhvfdsv', address='d666fhhdvsvafva', cost=10,
+            owner_address='dfcasdfdfdfdfcvs', user_address='jlhgk666gdfgv',
             user_id=test_user.id, contract_type=1
         )
-        test_base_contract.save()
-        # base_contract=Contract.objects.all().first()
-        # test_common_details = CommonDetails(contract_id=test_base_contract.id)
-        # test_common_details.save()
+        test_token_contract.save()
 
-        test_ethcontract = EthContract(
-            address='hjbwdbbaddsjvjmv',
-            contract=test_base_contract
+        test_token_ethcontract = EthContract(
+            address='hjb666666jggvjmv',
+            contract=test_token_contract
         )
-        test_ethcontract.save()
+        test_token_ethcontract.save()
+
+        test_crowdsale_contract = Contract(
+            name='sdvsdvd888dhhvfdsv', address='dfasdf888hdvsvafva', cost=10,
+            owner_address='dfcasdf66dfcvs', user_address='jlhg88gfgdfgv',
+            user_id=test_user.id, contract_type=1
+        )
+        test_crowdsale_contract.save()
+
+        test_crowdsale_ethcontract = EthContract(
+            address='hjbwsssdsjggvjmv',
+            contract=test_token_contract
+        )
+        test_crowdsale_ethcontract.save()
+
+
         test_details = ContractDetailsICO(
-            token_name='dffsvscv',
-            token_short_name='kk',
-            admin_address='cscdscs',
-            decimals=40,
+            token_name='dffs44vscv',
+            token_short_name='k5k',
+            admin_address='cscd444scs',
             rate=10,
+            decimals=22,
             start_date=100,
             stop_date=1100,
-            contract_id=1,
-            eth_contract_token_id=test_ethcontract.id,
-            eth_contract_crowdsale_id=test_ethcontract.id
+            contract_id=test_token_ethcontract.id,
+            eth_contract_token_id=test_token_ethcontract.id,
+            eth_contract_crowdsale_id=test_crowdsale_ethcontract.id
         )
         test_details.save()
-        test_contract = EthContract.objects.get(id=test_ethcontract.id)
-        test_message = {'contractId': test_contract.id}
+
+        ownershipTransferred({'crowdsaleId':test_crowdsale_ethcontract.id})
+
+        test_message = {'contractId': test_token_contract.id}
+        initialized(test_message)
         finalized(test_message)
-        result_contract = EthContract.objects.get(id=test_contract.id)
+        result_contract = EthContract.objects.get(id=test_token_contract.id)
         self.assertEqual(result_contract.contract.state, 'ENDED')
 
 
