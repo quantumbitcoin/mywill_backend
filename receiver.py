@@ -147,20 +147,20 @@ def callback(ch, method, properties, body):
         ch.basic_ack(delivery_tag = method.delivery_tag)
 
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(
+if __name__ == "__main__":
+    connection = pika.BlockingConnection(pika.ConnectionParameters(
         'localhost',
         5672,
         'mywill',
         pika.PlainCredentials('java', 'java'),
-))
+    ))
 
+    """
+    rabbitmqctl add_user java java
+    rabbitmqctl add_vhost mywill
+    rabbitmqctl set_permissions -p mywill java ".*" ".*" ".*"
+    """
 
-"""
-rabbitmqctl add_user java java
-rabbitmqctl add_vhost mywill
-rabbitmqctl set_permissions -p mywill java ".*" ".*" ".*"
-"""
-if __name__ == "__main__":
     channel = connection.channel()
     channel.queue_declare(queue=MESSAGE_QUEUE, durable=True, auto_delete=False, exclusive=False)
     channel.basic_consume(callback, queue=MESSAGE_QUEUE)

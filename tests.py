@@ -45,13 +45,102 @@ class TestReceiver(unittest.TestCase):
         )
         test_base_contract.save()
 
-        test_ethcontract = EthContract(address='hjbjvjmv', contract=test_base_contract)
+        test_ethcontract = EthContract(
+            address='hjbjvjmv', contract=test_base_contract
+        )
         test_ethcontract.save()
         test_contract = EthContract.objects.all().first()
         test_message = {'contractId': test_contract.id}
         killed(test_message)
         result_contract = EthContract.objects.get(id=test_contract.id)
         self.assertEqual(result_contract.contract.state, 'KILLED')
+
+    def test_triggered(self):
+        test_user = User(
+            email='no11@no.no',
+            username='ffff',
+            password='ffffff'
+        )
+        test_user.save()
+
+        test_base_contract = Contract(
+            name='sdvsdvdddasdvfdsv', address='dfasdfdfdvsvafva', cost=10,
+            owner_address='dfcasdfdfdfdfcvs', user_address='jlhgkgfgfgdfgv',
+            user_id=test_user.id
+        )
+        test_base_contract.save()
+
+        test_ethcontract = EthContract(
+            address='hjbwdaddsjvjmv',
+            contract=test_base_contract
+        )
+        test_ethcontract.save()
+        test_contract = EthContract.objects.get(id=test_ethcontract.id)
+        test_message = {'contractId': test_contract.id}
+        triggered(test_message)
+        result_contract = EthContract.objects.get(id=test_contract.id)
+        self.assertEqual(result_contract.contract.state, 'TRIGGERED')
+
+    def test_deployed(self):
+        test_user = User(
+            email='no111@no.no',
+            username='ffffff',
+            password='ffffff'
+        )
+        test_user.save()
+
+        test_base_contract = Contract(
+            name='sdvsdvdddasdvfdsv', address='dfasdfdfdvsvafva', cost=10,
+            owner_address='dfcasdfdfdfdfcvs', user_address='jlhgkgfgfgdfgv',
+            user_id=test_user.id
+        )
+        test_base_contract.save()
+
+        test_ethcontract = EthContract(
+            address='hjbwdaddsjvjmv',
+            contract=test_base_contract
+        )
+        test_ethcontract.save()
+        test_contract = EthContract.objects.get(id=test_ethcontract.id)
+        test_message = {
+            'contractId': test_contract.id,
+            'address': 'sdjfn;kjdbldjbslkjdbs'
+                        }
+        deployed(test_message)
+        result_contract = EthContract.objects.get(id=test_contract.id)
+        self.assertEqual(result_contract.contract.state, 'ACTIVE')
+
+    def test_launch(self):
+        test_user = User(
+            email='no11111@no.no',
+            username='ffffffff',
+            password='ffffffff'
+        )
+        test_user.save()
+
+        test_base_contract = Contract(
+            name='sdvsdvdddasdsgvfv', address='dfafdfdvsvafva', cost=10,
+            owner_address='dfcasdfdfdvs', user_address='jlfgfgdfgv',
+            user_id=test_user.id
+        )
+        test_base_contract.save()
+
+        test_ethcontract = EthContract(
+            address='hjbwdaddsjfddfvjmv',
+            contract=test_base_contract
+        )
+        test_ethcontract.save()
+        test_contract = EthContract.objects.get(id=test_ethcontract.id)
+        test_message = {
+            'contractId': test_contract.id,
+            'address': 'sdjfn;kjdbddldjbslkjdbs'
+                        }
+        launch(test_message)
+        result_contract = EthContract.objects.get(id=test_contract.id)
+        self.assertEqual(
+            result_contract.contract.state, 'WAITING_FOR_DEPLOYMENT'
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
