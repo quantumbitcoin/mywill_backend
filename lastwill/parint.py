@@ -2,6 +2,8 @@
 import json
 import requests
 
+from lastwill.settings import PARINT_HOST, PARINT_PORT
+
 class ParConnectExc(Exception):
     def __init__(self, *args):
         self.value = 'can not connect to parity'
@@ -14,7 +16,7 @@ class ParErrorExc(Exception):
 
     
 class ParInt:
-    def __init__(self, addr='127.0.0.1', port='8545'):
+    def __init__(self, addr=PARINT_HOST, port=PARINT_PORT):
         self.addr = addr
         self.port = port
 
@@ -41,7 +43,7 @@ class ParInt:
         return f
     
 if __name__ == '__main__':
-    par_int = ParInt('127.0.0.1', '8545')
+    par_int = ParInt(PARINT_HOST, PARINT_PORT)
     try:
         print(par_int.parity_nextNonce('0x' + '0'*40))
     except (ParConnectExc, ParErrorExc) as e :

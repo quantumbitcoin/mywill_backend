@@ -269,15 +269,15 @@ class TestReceiver(unittest.TestCase):
             eth_contract_crowdsale_id=test_crowdsale_ethcontract.id
         )
         test_details.save()
-        # test_details_token = ContractDetailsToken(
-        #     token_name='jbbmddddsdsss',
-        #     token_short_name='njcjncvjnx',
-        #     admin_address='bcvcxxcxccx',
-        #     decimals=100,
-        #     contract_id=test_token_ethcontract.id,
-        #     eth_contract_token_id=test_token_ethcontract.id
-        # )
-        # test_details_token.save()
+        test_details_token = ContractDetailsToken(
+            token_name='jbbmddddsdsss',
+            token_short_name='njcjncvjnx',
+            admin_address='bcvcxxcxccx',
+            decimals=100,
+            contract_id=test_token_ethcontract.id,
+            eth_contract_token_id=test_token_ethcontract.id
+        )
+        test_details_token.save()
 
         # print('contraaaaaact', test_crowdsale_ethcontract.contract.id)
         test_message = {

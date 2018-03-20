@@ -211,6 +211,9 @@ SOCIALACCOUNT_PROVIDERS = {
 
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 
+PARINT_HOST = '127.0.0.1'
+PARINT_PORT = '8545'
+
 try:
     from lastwill.settings_local import *
 except ImportError as exc:
