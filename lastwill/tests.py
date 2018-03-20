@@ -61,3 +61,31 @@ class TestReceiver(unittest.TestCase):
     def test_get_statistics(self):
         request = factory.get('/api/get_statistics/')
         assert(request.status_code==200)
+
+    def test_get_contracts(self):
+        request = factory.get('/api/contracts')
+        assert(request.status_code==200)
+
+    def test_get_sentences(self):
+        request = factory.get('/api/sentences')
+        assert(request.status_code==200)
+
+    def test_post_contracts(self):
+        request = factory.post('/api/contracts', {
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 3
+        })
+        assert(request.status_code==200)
+
+    def test_post_sentences(self):
+        request = factory.post('/api/sentences', {
+            'username': test_user.username,
+            'email': test_user.email,
+            'contract_name': 'sdcscs',
+            'message': 'czsdcsdsdc'
+        })
+        assert(request.status_code==200)
