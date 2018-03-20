@@ -30,12 +30,6 @@ class TestReceiver(unittest.TestCase):
         }, format='json')
         assert(request.status_code==200)
 
-    def test_test_comp(self):
-        request = factory.get('/api/test_comp/', {
-            'id': 1,
-        }, format='json')
-        assert(request.status_code==200)
-
     def test_get_contract_type(self):
         request = factory.get('/api/get_contract_types/', {
             'id': 1,
@@ -181,3 +175,15 @@ class TestReceiver(unittest.TestCase):
     def test_admin(self):
         request = factory.post('/api/jopa')
         assert(request.status_code==200)
+
+    # def test_test_comp(self):
+    #     request = factory.post('/api/contracts', {
+    #         'user_id': test_user.id,
+    #         'owner_address': 'dsasdadsa',
+    #         'cost': 100,
+    #         'balance': 300,
+    #         'name': 'scacsc',
+    #         'contract_type': 3
+    #     })
+    #     request = factory.get('/api/test_comp/', {'id': 1})
+    #     assert(request.status_code==200)
