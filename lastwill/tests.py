@@ -123,3 +123,38 @@ class TestReceiver(unittest.TestCase):
             'message': 'czsdcsdsddsdc'
         })
         assert(request.status_code==200)
+
+    def test_put_contracts(self):
+        request = factory.post('/api/contracts', {
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 3
+        })
+        request = factory.put('/api/contracts/1', {
+            'name': 'scacsc'
+        })
+        assert(request.status_code==200)
+
+    def test_put_sentences(self):
+        request = factory.post('/api/sentences/1', {
+            'username': test_user.username,
+            'email': test_user.email,
+            'contract_name': 'sdcscs',
+            'message': 'czsdcsdsdc'
+        })
+        request = factory.put('/api/sentences/1', {
+            'message': 'czsdcsdsddsdc'
+        })
+        assert(request.status_code==200)
+
+    def test_delete_contracts(self):
+        request = factory.delete('/api/contracts/1')
+        assert(request.status_code==200)
+
+    def test_delete_sentences(self):
+        request = factory.delete('/api/sentences/1')
+        assert(request.status_code==200)
+
