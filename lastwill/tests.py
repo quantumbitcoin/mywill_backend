@@ -57,3 +57,7 @@ class TestReceiver(unittest.TestCase):
             'user': test_user
         }, format='json')
         assert(request.status_code==200)
+
+    def test_get_statistics(self):
+        request = factory.get('/api/get_statistics/')
+        assert(request.status_code==200)

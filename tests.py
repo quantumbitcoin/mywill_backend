@@ -232,7 +232,7 @@ class TestReceiver(unittest.TestCase):
         test_token_contract = Contract(
             name='sdvsdvdddasdhhvfdsv', address='dfasdfdfhhdvsvafva', cost=10,
             owner_address='dfcasdfdfdfdfcvs', user_address='jlhgkgfgfgdfgv',
-            user_id=test_user.id, contract_type=5
+            user_id=test_user.id, contract_type=4
         )
         test_token_contract.save()
 
@@ -245,7 +245,7 @@ class TestReceiver(unittest.TestCase):
         test_crowdsale_contract = Contract(
             name='sdvsdvdddasdhhvfdsv', address='dfasdfdfhhdvsvafva', cost=10,
             owner_address='dfcasdfdfdfdfcvs', user_address='jlhgkgfgfgdfgv',
-            user_id=test_user.id, contract_type=5
+            user_id=test_user.id, contract_type=4
         )
         test_crowdsale_contract.save()
 
@@ -269,15 +269,15 @@ class TestReceiver(unittest.TestCase):
             eth_contract_crowdsale_id=test_crowdsale_ethcontract.id
         )
         test_details.save()
-        # test_details_token = ContractDetailsToken(
-        #     token_name='jbbmddddsdsss',
-        #     token_short_name='njcjncvjnx',
-        #     admin_address='bcvcxxcxccx',
-        #     decimals=100,
-        #     contract_id=test_token_ethcontract.id,
-        #     eth_contract_token_id=test_token_ethcontract.id
-        # )
-        # test_details_token.save()
+        test_details_token = ContractDetailsToken(
+            token_name='jbbmddddsdsss',
+            token_short_name='njcjncvjnx',
+            admin_address='bcvcxxcxccx',
+            decimals=100,
+            contract_id=test_token_ethcontract.id,
+            eth_contract_token_id=test_token_ethcontract.id
+        )
+        test_details_token.save()
 
         # print('contraaaaaact', test_crowdsale_ethcontract.contract.id)
         test_message = {
@@ -302,7 +302,7 @@ class TestReceiver(unittest.TestCase):
         test_token_contract = Contract(
             name='sdvsdv55555hhvfdsv', address='d666fhhdvsvafva', cost=10,
             owner_address='dfcasdfdfdfdfcvs', user_address='jlhgk666gdfgv',
-            user_id=test_user.id, contract_type=1
+            user_id=test_user.id, contract_type=4
         )
         test_token_contract.save()
 
@@ -315,7 +315,7 @@ class TestReceiver(unittest.TestCase):
         test_crowdsale_contract = Contract(
             name='sdvsdvd888dhhvfdsv', address='dfasdf888hdvsvafva', cost=10,
             owner_address='dfcasdf66dfcvs', user_address='jlhg88gfgdfgv',
-            user_id=test_user.id, contract_type=1
+            user_id=test_user.id, contract_type=4
         )
         test_crowdsale_contract.save()
 
