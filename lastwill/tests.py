@@ -70,6 +70,14 @@ class TestReceiver(unittest.TestCase):
         request = factory.get('/api/sentences')
         assert(request.status_code==200)
 
+    def test_get_one_contract(self):
+        request = factory.get('/api/contracts/1')
+        assert(request.status_code==200)
+
+    def test_get_one_sentence(self):
+        request = factory.get('/api/sentences/1')
+        assert(request.status_code==200)
+
     def test_post_contracts(self):
         request = factory.post('/api/contracts', {
             'user_id': test_user.id,
@@ -87,5 +95,31 @@ class TestReceiver(unittest.TestCase):
             'email': test_user.email,
             'contract_name': 'sdcscs',
             'message': 'czsdcsdsdc'
+        })
+        assert(request.status_code==200)
+
+    def test_patch_contracts(self):
+        request = factory.post('/api/contracts', {
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 3
+        })
+        request = factory.patch('/api/contracts/1', {
+            'name': 'scacsc'
+        })
+        assert(request.status_code==200)
+
+    def test_patch_sentences(self):
+        request = factory.post('/api/sentences/1', {
+            'username': test_user.username,
+            'email': test_user.email,
+            'contract_name': 'sdcscs',
+            'message': 'czsdcsdsdc'
+        })
+        request = factory.patch('/api/sentences/1', {
+            'message': 'czsdcsdsddsdc'
         })
         assert(request.status_code==200)
