@@ -169,6 +169,7 @@ ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 REST_FRAMEWORK = { 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': None, # return all objects if no limit specified
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
 SIGNER='127.0.0.1:5000'
