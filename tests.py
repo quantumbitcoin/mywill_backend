@@ -5,7 +5,10 @@ from receiver import *
 from django.contrib.auth.models import User
 from lastwill.profile.models import Profile
 from lastwill.contracts.serializers import ContractSerializer
-from lastwill.contracts.models import EthContract, Contract, ContractDetailsLostKey, ContractDetailsICO
+from lastwill.contracts.models import (
+    EthContract, Contract, ContractDetailsLostKey,
+    ContractDetailsICO, ContractDetailsToken
+)
 
 
 class TestReceiver(unittest.TestCase):
@@ -229,7 +232,7 @@ class TestReceiver(unittest.TestCase):
         test_token_contract = Contract(
             name='sdvsdvdddasdhhvfdsv', address='dfasdfdfhhdvsvafva', cost=10,
             owner_address='dfcasdfdfdfdfcvs', user_address='jlhgkgfgfgdfgv',
-            user_id=test_user.id
+            user_id=test_user.id, contract_type=5
         )
         test_token_contract.save()
 
@@ -242,7 +245,7 @@ class TestReceiver(unittest.TestCase):
         test_crowdsale_contract = Contract(
             name='sdvsdvdddasdhhvfdsv', address='dfasdfdfhhdvsvafva', cost=10,
             owner_address='dfcasdfdfdfdfcvs', user_address='jlhgkgfgfgdfgv',
-            user_id=test_user.id
+            user_id=test_user.id, contract_type=5
         )
         test_crowdsale_contract.save()
 
@@ -266,12 +269,22 @@ class TestReceiver(unittest.TestCase):
             eth_contract_crowdsale_id=test_crowdsale_ethcontract.id
         )
         test_details.save()
+        # test_details_token = ContractDetailsToken(
+        #     token_name='jbbmddddsdsss',
+        #     token_short_name='njcjncvjnx',
+        #     admin_address='bcvcxxcxccx',
+        #     decimals=100,
+        #     contract_id=test_token_ethcontract.id,
+        #     eth_contract_token_id=test_token_ethcontract.id
+        # )
+        # test_details_token.save()
 
+        # print('contraaaaaact', test_crowdsale_ethcontract.contract.id)
         test_message = {
-            'contractId': test_token_contract.id,
+            'contractId': test_token_ethcontract.id,
             'crowdsaleId': test_crowdsale_ethcontract.id
         }
-
+        print('initialized')
         ownershipTransferred(test_message)
 
         initialized(test_message)
