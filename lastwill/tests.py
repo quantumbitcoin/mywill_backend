@@ -158,3 +158,26 @@ class TestReceiver(unittest.TestCase):
         request = factory.delete('/api/sentences/1')
         assert(request.status_code==200)
 
+    # def test_get_discount(self):
+    #     request = factory.get('/api/get_discount/', {
+    #         'user': test_user,
+    #         'contract_type': 2,
+    #         'promo': 'SDSDDSD'
+    #     })
+    #     assert(request.status_code==200)
+
+    def test_resend_email(self):
+        request = factory.post('/api/resend_email', {
+            'email': test_user.email,
+        })
+        assert(request.status_code==200)
+
+    def test_count_sold_tokens(self):
+        request = factory.post('/api/count_sold_tokens_in_ICO', {
+            'address': 'sdvsdvsfdvsdfvsfdvsfd'
+        })
+        assert(request.status_code==200)
+
+    def test_admin(self):
+        request = factory.post('/api/jopa')
+        assert(request.status_code==200)
