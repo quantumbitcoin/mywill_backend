@@ -1,5 +1,6 @@
 import unittest
 import datetime
+import pika
 
 from receiver import *
 from django.contrib.auth.models import User
@@ -348,6 +349,18 @@ class TestReceiver(unittest.TestCase):
         result_contract = EthContract.objects.get(id=test_token_contract.id)
         self.assertEqual(result_contract.contract.state, 'ENDED')
 
+        def test_rabbitmq_connection(self):
+            connection = pika.BlockingConnection(pika.ConnectionParameters(
+                'localhost',
+                5672,
+                'mywill',
+                pika.PlainCredentials('java', 'java'),
+            ))
+            channel = connection.channel()
+            channel.queue_declare(queue=MESSAGE_QUEUE, durable=True,
+                                  auto_delete=False, exclusive=False)
+            channel.basic_consume(callback, queue=MESSAGE_QUEUE)
+            self.assertEqual(False, channel.is_closed)
 
 
 if __name__ == '__main__':
