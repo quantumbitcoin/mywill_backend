@@ -1,5 +1,6 @@
 from lastwill.settings import *
 from lastwill.contracts.api import ContractViewSet
+from lastwill.contracts.models import Contract
 import unittest
 from rest_framework.test import force_authenticate
 from django.contrib.auth.models import User
@@ -280,6 +281,9 @@ class TestContracts(unittest.TestCase):
         response = view(request)
         assert (response.status_code == 200)
 
+
+
+
     def test_put_contract(self):
         request = factory2.put('/api/contracts/1', {
             'owner_address': 'dsasdaddffdfdfd',
@@ -288,6 +292,41 @@ class TestContracts(unittest.TestCase):
         )
         force_authenticate(request, user=test_user)
         response = view(request)
+        assert (response.status_code == 200)
+
+    def test_put_contract1(self):
+
+        # request = factory2.get('/api/contracts?contract_type=1',
+        #         headers={'X-CSRFToken': csrftoken}
+        #     )
+        # force_authenticate(request, user=test_user)
+        # response = view(request)
+        #
+        # print('ololo', response.data)
+
+        request = factory2.post('/api/contracts/', {
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 1
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+
+        contract = Contract.objects.filter(contract_type=1).first()
+        print('contract contract', contract)
+        if contract:
+            request = factory2.put('/api/contracts/%d' %contract.id, {
+                'owner_address': contract.owner_address,
+                },
+                headers={'X-CSRFToken': csrftoken}
+            )
+            force_authenticate(request, user=test_user)
+            response = view(request)
         assert (response.status_code == 200)
 
     def test_patch_contract(self):
