@@ -195,13 +195,12 @@ class TestUrls(unittest.TestCase):
 contract_client = RequestsClient()
 
 # Obtain a CSRF token.
-response = contract_client.get('http://127.0.0.1:8000/')
-assert response.status_code == 200
-csrftoken = response.cookies['csrftoken']
+test_response = contract_client.get('http://127.0.0.1:8000/')
+assert test_response.status_code == 200
+csrftoken = test_response.cookies['csrftoken']
 
 factory2 = APIRequestFactory()
 
-test_user = User.objects.first()
 view = ContractViewSet.as_view({'post': 'list', 'put': 'list', 'patch': 'list', 'delete':'list'})
 
 class TestContracts(unittest.TestCase):
@@ -232,7 +231,6 @@ class TestContracts(unittest.TestCase):
             },
             headers = {'X-CSRFToken': csrftoken}
         )
-        # print(dir(request))
         force_authenticate(request, user=test_user)
         response = view(request)
         assert(response.status_code == 200)
@@ -309,4 +307,3 @@ class TestContracts(unittest.TestCase):
         force_authenticate(request, user=test_user)
         response = view(request)
         assert (response.status_code == 200)
-
