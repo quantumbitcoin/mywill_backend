@@ -294,14 +294,6 @@ class TestContracts(unittest.TestCase):
 
     def test_put_contract1(self):
 
-        # request = factory2.get('/api/contracts?contract_type=1',
-        #         headers={'X-CSRFToken': csrftoken}
-        #     )
-        # force_authenticate(request, user=test_user)
-        # response = view(request)
-        #
-        # print('ololo', response.data)
-
         request = factory2.post('/api/contracts/', {
             'id': 200,
             'user_id': test_user.id,
@@ -327,14 +319,6 @@ class TestContracts(unittest.TestCase):
         assert (response.status_code == 200)
 
     def test_put_contract2(self):
-
-        # request = factory2.get('/api/contracts?contract_type=1',
-        #         headers={'X-CSRFToken': csrftoken}
-        #     )
-        # force_authenticate(request, user=test_user)
-        # response = view(request)
-        #
-        # print('ololo', response.data)
 
         request = factory2.post('/api/contracts/', {
             'id': 300,
@@ -362,14 +346,6 @@ class TestContracts(unittest.TestCase):
 
     def test_put_contract3(self):
 
-        # request = factory2.get('/api/contracts?contract_type=1',
-        #         headers={'X-CSRFToken': csrftoken}
-        #     )
-        # force_authenticate(request, user=test_user)
-        # response = view(request)
-        #
-        # print('ololo', response.data)
-
         request = factory2.post('/api/contracts/', {
             'id': 400,
             'user_id': test_user.id,
@@ -396,14 +372,6 @@ class TestContracts(unittest.TestCase):
 
     def test_put_contract5(self):
 
-        # request = factory2.get('/api/contracts?contract_type=1',
-        #         headers={'X-CSRFToken': csrftoken}
-        #     )
-        # force_authenticate(request, user=test_user)
-        # response = view(request)
-        #
-        # print('ololo', response.data)
-
         request = factory2.post('/api/contracts/', {
             'id': 500,
             'user_id': test_user.id,
@@ -429,14 +397,6 @@ class TestContracts(unittest.TestCase):
         assert (response.status_code == 200)
 
     def test_put_contract6(self):
-
-        # request = factory2.get('/api/contracts?contract_type=1',
-        #         headers={'X-CSRFToken': csrftoken}
-        #     )
-        # force_authenticate(request, user=test_user)
-        # response = view(request)
-        #
-        # print('ololo', response.data)
 
         request = factory2.post('/api/contracts/', {
             'id': 600,
