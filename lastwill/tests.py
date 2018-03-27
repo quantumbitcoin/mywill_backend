@@ -7,10 +7,10 @@ from django.contrib.auth.models import User
 from rest_framework.test import APIClient, RequestsClient, APIRequestFactory
 
 
-
 factory1 = APIClient()
 
 test_user = User.objects.first()
+
 
 class TestUrls(unittest.TestCase):
     def test_get_cost(self):
@@ -204,6 +204,7 @@ factory2 = APIRequestFactory()
 
 view = ContractViewSet.as_view({'post': 'list', 'put': 'list', 'patch': 'list', 'delete':'list'})
 
+
 class TestContracts(unittest.TestCase):
 
     def test_create_contracts3(self):
@@ -281,9 +282,6 @@ class TestContracts(unittest.TestCase):
         response = view(request)
         assert (response.status_code == 200)
 
-
-
-
     def test_put_contract(self):
         request = factory2.put('/api/contracts/1', {
             'owner_address': 'dsasdaddffdfdfd',
@@ -305,6 +303,7 @@ class TestContracts(unittest.TestCase):
         # print('ololo', response.data)
 
         request = factory2.post('/api/contracts/', {
+            'id': 200,
             'user_id': test_user.id,
             'owner_address': 'dsasdadsa',
             'cost': 100,
@@ -316,17 +315,151 @@ class TestContracts(unittest.TestCase):
         )
         force_authenticate(request, user=test_user)
         response = view(request)
+        assert (response.status_code == 200)
 
-        contract = Contract.objects.filter(contract_type=1).first()
-        print('contract contract', contract)
-        if contract:
-            request = factory2.put('/api/contracts/%d' %contract.id, {
-                'owner_address': contract.owner_address,
+        request = factory2.put('/api/contracts/200', {
+                'owner_address': 'dfsgfdg',
                 },
                 headers={'X-CSRFToken': csrftoken}
             )
-            force_authenticate(request, user=test_user)
-            response = view(request)
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_put_contract2(self):
+
+        # request = factory2.get('/api/contracts?contract_type=1',
+        #         headers={'X-CSRFToken': csrftoken}
+        #     )
+        # force_authenticate(request, user=test_user)
+        # response = view(request)
+        #
+        # print('ololo', response.data)
+
+        request = factory2.post('/api/contracts/', {
+            'id': 300,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 2
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.put('/api/contracts/300', {
+                'owner_address': 'dfsgfdg',
+                },
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_put_contract3(self):
+
+        # request = factory2.get('/api/contracts?contract_type=1',
+        #         headers={'X-CSRFToken': csrftoken}
+        #     )
+        # force_authenticate(request, user=test_user)
+        # response = view(request)
+        #
+        # print('ololo', response.data)
+
+        request = factory2.post('/api/contracts/', {
+            'id': 400,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 3
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.put('/api/contracts/400', {
+                'owner_address': 'dfsgfdg',
+                },
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_put_contract5(self):
+
+        # request = factory2.get('/api/contracts?contract_type=1',
+        #         headers={'X-CSRFToken': csrftoken}
+        #     )
+        # force_authenticate(request, user=test_user)
+        # response = view(request)
+        #
+        # print('ololo', response.data)
+
+        request = factory2.post('/api/contracts/', {
+            'id': 500,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 5
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.put('/api/contracts/500', {
+                'owner_address': 'dfsgfdg',
+                },
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_put_contract6(self):
+
+        # request = factory2.get('/api/contracts?contract_type=1',
+        #         headers={'X-CSRFToken': csrftoken}
+        #     )
+        # force_authenticate(request, user=test_user)
+        # response = view(request)
+        #
+        # print('ololo', response.data)
+
+        request = factory2.post('/api/contracts/', {
+            'id': 600,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 6
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.put('/api/contracts/600', {
+                'owner_address': 'dfsgfdg',
+                },
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
         assert (response.status_code == 200)
 
     def test_patch_contract(self):
@@ -339,10 +472,260 @@ class TestContracts(unittest.TestCase):
         response = view(request)
         assert (response.status_code == 200)
 
+    def test_patch_contract1(self):
+
+        request = factory2.post('/api/contracts/', {
+            'id': 700,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 1
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.patch('/api/contracts/700', {
+                'owner_address': 'dfsgfdg',
+                },
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_patch_contract2(self):
+
+        request = factory2.post('/api/contracts/', {
+            'id': 800,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 2
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.patch('/api/contracts/800', {
+                'owner_address': 'dfsgfdg',
+                },
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_patch_contract3(self):
+
+        request = factory2.post('/api/contracts/', {
+            'id': 900,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 3
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.patch('/api/contracts/900', {
+                'owner_address': 'dfsgfdg',
+                },
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_patch_contract5(self):
+
+        request = factory2.post('/api/contracts/', {
+            'id': 1000,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 5
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.patch('/api/contracts/1000', {
+                'owner_address': 'dfsgfdg',
+                },
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_patch_contract6(self):
+
+        request = factory2.post('/api/contracts/', {
+            'id': 1100,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 6
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.patch('/api/contracts/1100', {
+                'owner_address': 'dfsgfdg',
+                },
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
     def test_delete_contract(self):
         request = factory2.delete('/api/contracts/1',
             headers={'X-CSRFToken': csrftoken}
         )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_delete_contract1(self):
+
+        request = factory2.post('/api/contracts/', {
+            'id': 1200,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 1
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.delete('/api/contracts/1200',
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_delete_contract2(self):
+
+        request = factory2.post('/api/contracts/', {
+            'id': 1300,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 2
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.delete('/api/contracts/1300',
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_delete_contract3(self):
+
+        request = factory2.post('/api/contracts/', {
+            'id': 1400,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 3
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.delete('/api/contracts/1400',
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_delete_contract5(self):
+
+        request = factory2.post('/api/contracts/', {
+            'id': 1500,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 5
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.patch('/api/contracts/1500',
+                headers={'X-CSRFToken': csrftoken}
+            )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+    def test_delete_contract6(self):
+
+        request = factory2.post('/api/contracts/', {
+            'id': 1600,
+            'user_id': test_user.id,
+            'owner_address': 'dsasdadsa',
+            'cost': 100,
+            'balance': 300,
+            'name': 'scacsc',
+            'contract_type': 6
+            },
+            headers={'X-CSRFToken': csrftoken}
+        )
+        force_authenticate(request, user=test_user)
+        response = view(request)
+        assert (response.status_code == 200)
+
+        request = factory2.patch('/api/contracts/1600',
+                headers={'X-CSRFToken': csrftoken}
+            )
         force_authenticate(request, user=test_user)
         response = view(request)
         assert (response.status_code == 200)
