@@ -127,7 +127,7 @@ def add_time_bonuses(details):
 
 
 @logging
-def create_ethcontract_in_compile(abi, bytecode, cv, contract, source_code):
+def create_ethcontract_in_compile(abi, bytecode, cv, contract, source_code, lgr=[]):
     eth_contract_token = EthContract()
     eth_contract_token.abi = abi
     eth_contract_token.bytecode = bytecode
@@ -147,22 +147,20 @@ def add_real_params(params, admin_address, address, wallet_address):
 
 
 @logging
-def create_directory(details, sour_path='lastwill/ico-crowdsale/*', config_name='c-preprocessor-config.json'):
+def create_directory(details, sour_path='lastwill/ico-crowdsale/*', config_name='c-preprocessor-config.json', lgr=[]):
     details.temp_directory = str(uuid.uuid4())
-    test_logger.info('temp directory = %s' % details.temp_directory)
-    print(details.temp_directory, flush=True)
+    lgr.append('temp directory = %s' % details.temp_directory)
     sour = path.join(CONTRACTS_DIR, sour_path)
     dest = path.join(CONTRACTS_TEMP_DIR, details.temp_directory)
     os.mkdir(dest)
     os.system('cp -as {sour} {dest}'.format(sour=sour, dest=dest))
     preproc_config = os.path.join(dest, config_name)
     os.unlink(preproc_config)
-    # details.save()
     return dest, preproc_config
 
 
 @logging
-def test_crowdsale_params(config, params, dest):
+def test_crowdsale_params(config, params, dest, lgr=[]):
     with open(config, 'w') as f:
         f.write(json.dumps(params))
     if os.system("/bin/bash -c 'cd {dest} && ./compile-crowdsale.sh'".format(
@@ -174,7 +172,7 @@ def test_crowdsale_params(config, params, dest):
 
 
 @logging
-def test_token_params(config, params, dest):
+def test_token_params(config, params, dest, lgr=[]):
     with open(config, 'w') as f:
         f.write(json.dumps(params))
     if os.system("/bin/bash -c 'cd {dest} && ./compile-token.sh'".format(dest=dest)):
@@ -182,14 +180,14 @@ def test_token_params(config, params, dest):
 
 
 @logging
-def test_neo_token_params(config, params, dest):
+def test_neo_token_params(config, params, dest, lgr=[]):
     with open(config, 'w') as f:
         f.write(json.dumps(params))
     if os.system("/bin/bash -c 'cd {dest} && ./3_test_token.sh'".format(dest=dest)):
         raise Exception('compiler error while deploying')
 
 @logging
-def test_neo_ico_params(config, params, dest):
+def test_neo_ico_params(config, params, dest, lgr=[]):
     with open(config, 'w') as f:
         f.write(json.dumps(params))
     if os.system("/bin/bash -c 'cd {dest} && ./3_test_crowdsale.sh'".format(dest=dest)):
@@ -197,7 +195,7 @@ def test_neo_ico_params(config, params, dest):
 
 
 @logging
-def take_off_blocking(network, contract_id=None, address=None):
+def take_off_blocking(network, contract_id=None, address=None, lgr=[]):
     if not address:
         address = NETWORKS[network]['address']
     if not contract_id:
@@ -211,7 +209,7 @@ def take_off_blocking(network, contract_id=None, address=None):
 
 
 @logging
-def send_in_queue(contract_id, type, queue):
+def send_in_queue(contract_id, type, queue, lgr=[]):
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         'localhost',
         5672,
@@ -231,7 +229,7 @@ def send_in_queue(contract_id, type, queue):
 
 
 @logging
-def sign_transaction(address, nonce, gaslimit, network, value=None, dest=None, contract_data=None, gas_price=None):
+def sign_transaction(address, nonce, gaslimit, network, value=None, dest=None, contract_data=None, gas_price=None, lgr=[]):
     data = {
         'source': address,
         'nonce': nonce,
@@ -254,7 +252,7 @@ def sign_transaction(address, nonce, gaslimit, network, value=None, dest=None, c
 
 
 @logging
-def sign_neo_transaction(tx, binary_tx, address):
+def sign_neo_transaction(tx, binary_tx, address, lgr=[]):
     scripts = requests.post(
         'http://{}/neo_sign/'.format(SIGNER),
         json={'binary_tx': binary_tx, 'address': address}
@@ -302,11 +300,8 @@ class Contract(models.Model):
     next_check = models.DateTimeField(null=True, default=None)
 
     @logging
-    def save(self, *args, **kwargs):
+    def save(self, lgr=[], *args, **kwargs):
         # disable balance saving to prevent collisions with java daemon
-        print(args)
-        str_args = ','.join([str(x) for x in args])
-        test_logger.info('class Contract, method save, args: ' + str_args)
         if self.id:
             kwargs['update_fields'] = list(
                     {f.name for f in Contract._meta.fields if f.name not in ('balance', 'id')}
@@ -316,7 +311,7 @@ class Contract(models.Model):
         return super().save(*args, **kwargs)
 
     @logging
-    def get_details(self):
+    def get_details(self, lgr=[]):
         return getattr(self, self.get_details_model(
             self.contract_type
         ).__name__.lower()+'_set').first()
@@ -358,9 +353,7 @@ class CommonDetails(models.Model):
     contract = models.ForeignKey(Contract)
 
     @logging
-    def compile(self, eth_contract_attr_name='eth_contract'):
-        test_logger.info('class details, method compile')
-        print('compiling', flush=True)
+    def compile(self, eth_contract_attr_name='eth_contract', lgr=[]):
         sol_path = self.sol_path
         if getattr(self, eth_contract_attr_name):
             getattr(self, eth_contract_attr_name).delete()
@@ -389,10 +382,9 @@ class CommonDetails(models.Model):
         self.save()
 
     @logging
-    def deploy(self, eth_contract_attr_name='eth_contract'):
-        test_logger.info('deploy:')
+    def deploy(self, eth_contract_attr_name='eth_contract', lgr=[]):
         if self.contract.state == 'ACTIVE':
-            test_logger.error('launch message ignored because already deployed')
+            lgr.append('launch message ignored because already deployed')
             print('launch message ignored because already deployed', flush=True)
             take_off_blocking(self.contract.network.name)
             return
@@ -400,9 +392,8 @@ class CommonDetails(models.Model):
         eth_contract = getattr(self, eth_contract_attr_name)
         tr = abi.ContractTranslator(eth_contract.abi)
         arguments = self.get_arguments(eth_contract_attr_name)
-        print('arguments', arguments, flush=True)
         str_args = ','.join([str(x) for x in arguments])
-        test_logger.info('class details, method deploy, args: %s' %str_args)
+        lgr.append('method deploy for id=%d, args: %s' %(self.id, str_args))
         eth_contract.constructor_arguments = binascii.hexlify(
             tr.encode_constructor_arguments(arguments)
         ).decode() if arguments else ''
@@ -412,8 +403,7 @@ class CommonDetails(models.Model):
         eth_contract.constructor_arguments = binascii.hexlify(
             tr.encode_constructor_arguments(arguments)
         ).decode() if arguments else ''
-        test_logger.info('nonce %d' %nonce)
-        print('nonce', nonce, flush=True)
+        lgr.append('nonce %d' %nonce)
         data = eth_contract.bytecode + (binascii.hexlify(
             tr.encode_constructor_arguments(arguments)
         ).decode() if arguments else '')
@@ -422,10 +412,10 @@ class CommonDetails(models.Model):
             self.contract.network.name, value=self.get_value(),
             contract_data=data
         )
-        test_logger.info('source address %s' %address)
-        test_logger.info('gas limit %d' %self.get_gaslimit())
-        test_logger.info('value %d' %self.get_value())
-        test_logger.info('network %s' %self.contract.network.name)
+        lgr.append('source address %s' %address)
+        lgr.append('gas limit %d' %self.get_gaslimit())
+        lgr.append('value %d' %self.get_value())
+        lgr.append('network %s' %self.contract.network.name)
         print('fields of transaction', flush=True)
         print('source', address, flush=True)
         print('gas limit', self.get_gaslimit(), flush=True)
@@ -436,12 +426,12 @@ class CommonDetails(models.Model):
         )
         eth_contract.save()
         print('transaction sent', flush=True)
-        test_logger.info('transaction sent')
+        lgr.append('transaction sent')
         self.contract.state = 'WAITING_FOR_DEPLOYMENT'
         self.contract.save()
 
     @logging
-    def msg_deployed(self, message, eth_contract_attr_name='eth_contract'):
+    def msg_deployed(self, message, eth_contract_attr_name='eth_contract', lgr=[]):
         network_link = NETWORKS[self.contract.network.name]['link_address']
         network = self.contract.network.name
         network_name = MAIL_NETWORK[network]
@@ -467,7 +457,7 @@ class CommonDetails(models.Model):
         return 0
 
     @logging
-    def tx_failed(self, message):
+    def tx_failed(self, message, lgr=[]):
         self.contract.state = 'POSTPONED'
         self.contract.save()
         send_mail(
@@ -478,26 +468,23 @@ class CommonDetails(models.Model):
             DEFAULT_FROM_EMAIL,
             [EMAIL_FOR_POSTPONED_MESSAGE]
         )
-        test_logger.error('contract postponed due to transaction fail')
-        print('contract postponed due to transaction fail', flush=True)
+        lgr.append('contract postponed due to transaction fail')
         take_off_blocking(self.contract.network.name, self.contract.id)
-        print('queue unlocked due to transaction fail', flush=True)
-        test_logger.error('queue unlocked due to transaction fail')
+        lgr.append('queue unlocked due to transaction fail')
 
     def predeploy_validate(self):
         pass
 
     @blocking
     @logging
-    def check_contract(self):
-        print('checking', self.contract.name)
-        test_logger.info('checking id %d' %self.id)
+    def check_contract(self, lgr=[]):
+        lgr.append('checking id %d' %self.id)
         tr = abi.ContractTranslator(self.eth_contract.abi)
         par_int = ParInt(self.contract.network.name)
         address = self.contract.network.deployaddress_set.all()[0].address
         nonce = int(par_int.eth_getTransactionCount(address, "pending"), 16)
         print('nonce', nonce)
-        test_logger.info('nonce = %d' %nonce)
+        lgr.append('nonce = %d' %nonce)
         signed_data = sign_transaction(
             address, nonce, 600000, self.contract.network.name,
             dest=self.eth_contract.address,
@@ -505,11 +492,9 @@ class CommonDetails(models.Model):
                 tr.encode_function_call('check', [])
             ).decode(),
         )
-        test_logger.info('signed_data %s' %signed_data)
-        print('signed_data', signed_data)
+        lgr.append('signed_data %s' %signed_data)
         par_int.eth_sendRawTransaction('0x' + signed_data)
-        test_logger.info('check ok!')
-        print('check ok!')
+        lgr.append('check ok')
 
 
 @contract_details('Will contract')
@@ -538,7 +523,7 @@ class ContractDetailsLastwill(CommonDetails):
             raise ValidationError({'result': 1}, code=400)
 
     @logging
-    def contractPayment(self, message):
+    def contractPayment(self, message, lgr=[]):
         if self.contract.network.name not in ['RSK_MAINNET', 'RSK_TESTNET']:
             return
         ContractDetailsLastwill.objects.select_for_update().filter(
@@ -553,7 +538,7 @@ class ContractDetailsLastwill(CommonDetails):
 
     @blocking
     @logging
-    def make_payment(self, message):
+    def make_payment(self, message, lgr=[]):
         contract = self.contract
         par_int = ParInt(contract.network.name)
         wl_address = NETWORKS[self.contract.network.name]['address']
@@ -603,7 +588,7 @@ class ContractDetailsLastwill(CommonDetails):
 
     @staticmethod
     @logging
-    def calc_cost(kwargs, network):
+    def calc_cost(kwargs, network, lgr=[]):
         if NETWORKS[network.name]['is_free']:
             return 0
         heirs_num = int(kwargs['heirs_num']) if 'heirs_num' in kwargs else len(kwargs['heirs'])
@@ -637,14 +622,14 @@ class ContractDetailsLastwill(CommonDetails):
     @postponable
     @check_transaction
     @logging
-    def msg_deployed(self, message):
+    def msg_deployed(self, message, lgr=[]):
         super().msg_deployed(message)
         self.next_check = timezone.now() + datetime.timedelta(seconds=self.check_interval)
         self.save()
 
     @check_transaction
     @logging
-    def checked(self, message):
+    def checked(self, message, lgr=[]):
         now = timezone.now()
         self.last_check = now
         next_check = now + datetime.timedelta(seconds=self.check_interval)
@@ -657,7 +642,7 @@ class ContractDetailsLastwill(CommonDetails):
 
     @check_transaction
     @logging
-    def triggered(self, message):
+    def triggered(self, message, lgr=[]):
         self.last_check = timezone.now()
         self.next_check = None
         self.save()
@@ -690,7 +675,7 @@ class ContractDetailsLastwill(CommonDetails):
     @blocking
     @postponable
     @logging
-    def deploy(self):
+    def deploy(self, lgr=[]):
         if self.contract.network.name in ['RSK_MAINNET', 'RSK_TESTNET'] and self.btc_key is None:
             priv = os.urandom(32)
             if self.contract.network.name == 'RSK_MAINNET':
@@ -708,7 +693,7 @@ class ContractDetailsLastwill(CommonDetails):
 
     @blocking
     @logging
-    def i_am_alive(self, message):
+    def i_am_alive(self, message, lgr=[]):
         if self.last_press_imalive:
             delta = self.last_press_imalive - timezone.now()
             if delta.days < 1 and delta.total_seconds() < 60 * 60 * 24:
@@ -734,7 +719,7 @@ class ContractDetailsLastwill(CommonDetails):
 
     @blocking
     @logging
-    def cancel(self, message):
+    def cancel(self, message, lgr=[]):
         tr = abi.ContractTranslator(self.eth_contract.abi)
         par_int = ParInt(self.contract.network.name)
         address = self.contract.network.deployaddress_set.all()[0].address
@@ -752,7 +737,7 @@ class ContractDetailsLastwill(CommonDetails):
         self.eth_contract.save()
 
     @logging
-    def fundsAdded(self, message):
+    def fundsAdded(self, message, lgr=[]):
         if self.contract.network.name not in ['RSK_MAINNET', 'RSK_TESTNET']:
             return
         ContractDetailsLastwill.objects.select_for_update().filter(
@@ -800,7 +785,7 @@ class ContractDetailsLostKey(CommonDetails):
 
     @staticmethod
     @logging
-    def calc_cost(kwargs, network):
+    def calc_cost(kwargs, network, lgr=[]):
         if NETWORKS[network.name]['is_free']:
             return 0
         heirs_num = int(kwargs['heirs_num']) if 'heirs_num' in kwargs else len(kwargs['heirs'])
@@ -829,14 +814,14 @@ class ContractDetailsLostKey(CommonDetails):
     @postponable
     @check_transaction
     @logging
-    def msg_deployed(self, message):
+    def msg_deployed(self, message, lgr=[]):
         super().msg_deployed(message)
         self.next_check = timezone.now() + datetime.timedelta(seconds=self.check_interval)
         self.save()
 
     @check_transaction
     @logging
-    def checked(self, message):
+    def checked(self, message, lgr=[]):
         now = timezone.now()
         self.last_check = now
         next_check = now + datetime.timedelta(seconds=self.check_interval)
@@ -851,7 +836,7 @@ class ContractDetailsLostKey(CommonDetails):
 
     @check_transaction
     @logging
-    def triggered(self, message):
+    def triggered(self, message, lgr=[]):
         self.last_check = timezone.now()
         self.next_check = None
         self.save()
@@ -886,7 +871,7 @@ class ContractDetailsLostKey(CommonDetails):
     @blocking
     @postponable
     @logging
-    def deploy(self):
+    def deploy(self, lgr=[]):
         return super().deploy()
 
 @contract_details('Deferred payment contract')
@@ -921,14 +906,14 @@ class ContractDetailsDelayedPayment(CommonDetails):
     @postponable
     @check_transaction
     @logging
-    def msg_deployed(self, message):
+    def msg_deployed(self, message, lgr=[]):
         super().msg_deployed(message)
 
     def checked(self, message):
         pass
 
     @logging
-    def triggered(self, message):
+    def triggered(self, message, lgr=[]):
         link = NETWORKS[self.eth_contract.contract.network.name]['link_tx']
         if self.recepient_email:
             send_mail(
@@ -964,7 +949,7 @@ class ContractDetailsDelayedPayment(CommonDetails):
     @blocking
     @postponable
     @logging
-    def deploy(self):
+    def deploy(self, lgr=[]):
         return super().deploy()
 
 
@@ -1063,12 +1048,10 @@ class ContractDetailsICO(CommonDetails):
         return int(2.49 * 10**18)
 
     @logging
-    def compile(self, eth_contract_attr_name='eth_contract_token'):
-        print('ico_contract compile')
-        test_logger.info('ico contract compile id=%d' %self.id)
+    def compile(self, eth_contract_attr_name='eth_contract_token', lgr=[]):
+        lgr.append('ico contract compile id=%d' %self.id)
         if self.temp_directory:
-            print('already compiled')
-            test_logger.error('already compiled')
+            lgr.append('already compiled')
             return
         dest, preproc_config = create_directory(self)
         token_holders = self.contract.tokenholder_set.all()
@@ -1124,9 +1107,8 @@ class ContractDetailsICO(CommonDetails):
     @postponable
     @check_transaction
     @logging
-    def msg_deployed(self, message):
-        print('msg_deployed method of the ico contract')
-        test_logger.info('msg_deployed method of the ico contract')
+    def msg_deployed(self, message, lgr=[]):
+        lgr.append('msg_deployed method of the ico contract')
         address = NETWORKS[self.contract.network.name]['address']
         if self.contract.state != 'WAITING_FOR_DEPLOYMENT':
             take_off_blocking(self.contract.network.name)
@@ -1137,8 +1119,7 @@ class ContractDetailsICO(CommonDetails):
             self.eth_contract_crowdsale.address = message['address']
             self.eth_contract_crowdsale.save()
             take_off_blocking(self.contract.network.name)
-            print('status changed to waiting activation')
-            test_logger.info('status changed to waiting activation')
+            lgr.append('status changed to waiting activation')
             return
         if self.eth_contract_token.id == message['contractId']:
             self.eth_contract_token.address = message['address']
@@ -1149,11 +1130,9 @@ class ContractDetailsICO(CommonDetails):
             self.eth_contract_crowdsale.save()
             tr = abi.ContractTranslator(self.eth_contract_token.abi)
             par_int = ParInt(self.contract.network.name)
-            nonce = int(par_int.eth_getTransactionCount(address, "pending"), 16) 
-            print('nonce', nonce)
-            print('transferOwnership message signed')
-            test_logger.info('nonce %d' %nonce)
-            test_logger.info('transferOwnership message signed')
+            nonce = int(par_int.eth_getTransactionCount(address, "pending"), 16)
+            lgr.append('nonce %d' %nonce)
+            lgr.append('transferOwnership message signed')
             signed_data = sign_transaction(
                 address, nonce, 100000, self.contract.network.name,
                 dest=self.eth_contract_token.address,
@@ -1165,8 +1144,7 @@ class ContractDetailsICO(CommonDetails):
                 '0x'+signed_data
             )
             self.eth_contract_token.save()
-            test_logger.info('transferOwnership message sended')
-            print('transferOwnership message sended')
+            lgr.append('transferOwnership message sended')
 
     def get_gaslimit(self):
         return 3200000
@@ -1174,7 +1152,7 @@ class ContractDetailsICO(CommonDetails):
     @blocking
     @postponable
     @logging
-    def deploy(self, eth_contract_attr_name='eth_contract_token'):
+    def deploy(self, eth_contract_attr_name='eth_contract_token', lgr=[]):
         if self.reused_token:
             eth_contract_attr_name = 'eth_contract_crowdsale'
         return super().deploy(eth_contract_attr_name)
@@ -1190,13 +1168,12 @@ class ContractDetailsICO(CommonDetails):
     @postponable
 #    @check_transaction
     @logging
-    def ownershipTransferred(self, message):
+    def ownershipTransferred(self, message, lgr=[]):
         address = NETWORKS[self.contract.network.name]['address']
         if message['contractId'] != self.eth_contract_token.id:
             if self.contract.state == 'WAITING_FOR_DEPLOYMENT':
                 take_off_blocking(self.contract.network.name)
-            print('ignored', flush=True)
-            test_logger.error('ignored id %d' %self.id)
+            lgr.append('ignored id %d' %self.id)
             return
         if self.contract.state in ('ACTIVE', 'ENDED'):
             take_off_blocking(self.contract.network.name)
@@ -1208,10 +1185,8 @@ class ContractDetailsICO(CommonDetails):
         tr = abi.ContractTranslator(self.eth_contract_crowdsale.abi)
         par_int = ParInt(self.contract.network.name)
         nonce = int(par_int.eth_getTransactionCount(address, "pending"), 16)
-        print('nonce', nonce)
-        test_logger.info('nonce %d' %nonce)
-        print('init message signed')
-        test_logger.info('init message signed')
+        lgr.append('nonce %d' %nonce)
+        lgr.append('init message signed')
         signed_data = sign_transaction(
             address, nonce,
             100000 + 80000 * self.contract.tokenholder_set.all().count(),
@@ -1225,21 +1200,18 @@ class ContractDetailsICO(CommonDetails):
             '0x'+signed_data
         )
         self.eth_contract_crowdsale.save()
-        print('init message sended')
-        test_logger.info('init message sended')
-
+        lgr.append('init message sended')
 
     # crowdsale
     @postponable
     @check_transaction
     @logging
-    def initialized(self, message):
+    def initialized(self, message, lgr=[]):
         if self.contract.state != 'WAITING_FOR_DEPLOYMENT':
             return
         take_off_blocking(self.contract.network.name)
         if message['contractId'] != self.eth_contract_crowdsale.id:
-            print('ignored', flush=True)
-            test_logger.error('ignored id' %self.id)
+            lgr.append('ignored id' %self.id)
             return
         self.contract.state = 'ACTIVE'
         self.contract.save()
@@ -1265,7 +1237,7 @@ class ContractDetailsICO(CommonDetails):
             )
 
     @logging
-    def finalized(self, message):
+    def finalized(self, message, lgr=[]):
         if not self.continue_minting and self.eth_contract_token.original_contract.state != 'ENDED':
             self.eth_contract_token.original_contract.state = 'ENDED'
             self.eth_contract_token.original_contract.save()
@@ -1277,7 +1249,7 @@ class ContractDetailsICO(CommonDetails):
         pass
 
     @logging
-    def timesChanged(self, message):
+    def timesChanged(self, message, lgr=[]):
         if 'startTime' in message:
             self.start_date = message['startTime']
         if 'endTime' in message:
@@ -1326,12 +1298,10 @@ class ContractDetailsToken(CommonDetails):
         return []
 
     @logging
-    def compile(self, eth_contract_attr_name='eth_contract_token'):
-        print('standalone token contract compile')
-        test_logger.info('standalone token contract compile')
+    def compile(self, eth_contract_attr_name='eth_contract_token', lgr=[]):
+        lgr.append('standalone token contract compile')
         if self.temp_directory:
-            print('already compiled')
-            test_logger.error('already compiled id=%d' %self.id)
+            lgr.append('already compiled id=%d' %self.id)
             return
         dest, preproc_config = create_directory(self)
         token_holders = self.contract.tokenholder_set.all()
@@ -1360,7 +1330,7 @@ class ContractDetailsToken(CommonDetails):
     @blocking
     @postponable
     @logging
-    def deploy(self, eth_contract_attr_name='eth_contract_token'):
+    def deploy(self, eth_contract_attr_name='eth_contract_token', lgr=[]):
         return super().deploy(eth_contract_attr_name)
 
     def get_gaslimit(self):
@@ -1369,7 +1339,7 @@ class ContractDetailsToken(CommonDetails):
     @postponable
     @check_transaction
     @logging
-    def msg_deployed(self, message):
+    def msg_deployed(self, message, lgr=[]):
         res = super().msg_deployed(message, 'eth_contract_token')
         if not self.future_minting:
             self.contract.state = 'ENDED'
@@ -1377,7 +1347,7 @@ class ContractDetailsToken(CommonDetails):
         return res
 
     @logging
-    def ownershipTransferred(self, message):
+    def ownershipTransferred(self, message, lgr=[]):
         if self.eth_contract_token.original_contract.state not in (
                 'UNDER_CROWDSALE', 'ENDED'
         ):
@@ -1385,7 +1355,7 @@ class ContractDetailsToken(CommonDetails):
             self.eth_contract_token.original_contract.save()
 
     @logging
-    def finalized(self, message):
+    def finalized(self, messagelgr=[]):
         if self.eth_contract_token.original_contract.state != 'ENDED':
             self.eth_contract_token.original_contract.state = 'ENDED'
             self.eth_contract_token.original_contract.save()
@@ -1451,12 +1421,10 @@ class ContractDetailsNeo(CommonDetails):
         pass
 
     @logging
-    def compile(self):
-        print('standalone token contract compile')
-        test_logger.info('standalone token contract compile')
+    def compile(self, lgr=[]):
+        lgr.append('standalone token contract compile')
         if self.temp_directory:
-            print('already compiled')
-            test_logger.error('already compiled id %d' %self.id)
+            lgr.append('already compiled id %d' %self.id)
             return
         dest, preproc_config = create_directory(
             self, 'lastwill/neo-ico-contracts/*', 'token-config.json'
@@ -1484,12 +1452,10 @@ class ContractDetailsNeo(CommonDetails):
             f.write(json.dumps(preproc_params))
         if os.system("/bin/bash -c 'cd {dest} && ./2_compile_token.sh'".format(dest=dest)):
             raise Exception('compiler error while deploying')
-        print('dest', dest, flush=True)
-        test_logger.info('dest %s' %dest)
+        lgr.append('dest %s' %dest)
         test_neo_token_params(preproc_config, preproc_params, dest)
         with open(preproc_config, 'w') as f:
             f.write(json.dumps(preproc_params))
-
         with open(path.join(
                 dest,
                 'NEP5.Contract/bin/Release/netcoreapp2.0/publish/NEP5.Contract.abi.json'
@@ -1515,13 +1481,12 @@ class ContractDetailsNeo(CommonDetails):
     @blocking
     @postponable
     @logging
-    def deploy(self, contract_params='0710', return_type='05'):
+    def deploy(self, contract_params='0710', return_type='05', lgr=[]):
         self.compile()
         from_addr = NETWORKS[self.contract.network.name]['address']
         bytecode = self.neo_contract.bytecode
         neo_int = NeoInt(self.contract.network.name)
-        print('from address', from_addr)
-        test_logger.info('from address %s' %from_addr)
+        lgr.append('from address %s' %from_addr)
         details = {
             'name': 'WISH',
             'description': 'NEO smart contract',
@@ -1539,7 +1504,7 @@ class ContractDetailsNeo(CommonDetails):
                 'details': details,
         }
         response = neo_int.mw_construct_deploy_tx(param_list)
-        print('construct response', response, flush=True)
+        lgr.append(('construct response', response))
         binary_tx = response['tx']
         contract_hash = response['hash']
 
@@ -1547,25 +1512,18 @@ class ContractDetailsNeo(CommonDetails):
             binascii.unhexlify(binary_tx)
         )
         tx = sign_neo_transaction(tx, binary_tx, from_addr)
-        print('after sign', tx.ToJson()['txid'], flush=True)
-        test_logger.info('after sign %s' %tx.ToJson()['txid'])
+        lgr.append('after sign %s' %tx.ToJson()['txid'])
         ms = StreamManager.GetStream()
         writer = BinaryWriter(ms)
         tx.Serialize(writer)
         ms.flush()
         signed_tx = ms.ToArray()
-        print('full tx:', flush=True)
-        print(signed_tx, flush=True)
-        
         result = neo_int.sendrawtransaction(signed_tx.decode())
-        print(result, flush=True)
+        lgr.append(('result', result))
         if not result:
             raise TxFail()
-        print('contract hash:', contract_hash)
-        test_logger.info('contract hash: %s' %contract_hash)
-        print('result of send raw transaction: ', result)
-        test_logger.info('result of send raw transaction: %s' %result)
-
+        lgr.append('contract hash: %s' %contract_hash)
+        lgr.append('result of send raw transaction: %s' %result)
         self.neo_contract.address = contract_hash
         self.neo_contract.tx_hash = tx.ToJson()['txid']
         self.neo_contract.save()
@@ -1574,7 +1532,7 @@ class ContractDetailsNeo(CommonDetails):
     @postponable
     @check_transaction
     @logging
-    def msg_deployed(self, message):
+    def msg_deployed(self, message, lgr=[]):
         neo_int = NeoInt(self.contract.network.name)
         from_addr = NETWORKS[self.contract.network.name]['address']
         param_list = {
@@ -1594,19 +1552,18 @@ class ContractDetailsNeo(CommonDetails):
             binascii.unhexlify(binary_tx)
         )
         tx = sign_neo_transaction(tx, binary_tx, from_addr)
-        print('after sign', tx.ToJson()['txid'])
+        lgr.append('after sign %s' %tx.ToJson()['txid'])
         ms = StreamManager.GetStream()
         writer = BinaryWriter(ms)
         tx.Serialize(writer)
         ms.flush()
         signed_tx = ms.ToArray()
-        print('signed_tx', signed_tx)
+        lgr.append('signed_tx %s' %signed_tx)
         result = neo_int.sendrawtransaction(signed_tx.decode())
-        print(result, flush=True)
+        lgr.append('result %s' %result)
         if not result:
             raise TxFail()
-        print('result of send raw transaction: ', result)
-
+        lgr.append('result of send raw transaction: %s' %result)
         assert(result)
         self.contract.save()
         return
@@ -1614,7 +1571,7 @@ class ContractDetailsNeo(CommonDetails):
     @postponable
     @check_transaction
     @logging
-    def initialized(self, message):
+    def initialized(self, message, lgr=[]):
         if self.contract.state  not in ('WAITING_FOR_DEPLOYMENT', 'ENDED'):
             return
 
@@ -1634,7 +1591,7 @@ class ContractDetailsNeo(CommonDetails):
             )
 
     @logging
-    def finalized(self, message):
+    def finalized(self, message, lgr=[]):
         self.contract.state = 'ENDED'
         self.contract.save()
 
@@ -1668,12 +1625,10 @@ class ContractDetailsNeoICO(CommonDetails):
     reused_token = models.BooleanField(default=False)
 
     @logging
-    def compile(self):
-        print('standalone token contract compile')
-        test_logger.info('standalone token contract compile')
+    def compile(self, lgr=[]):
+        lgr.append('standalone token contract compile')
         if self.temp_directory:
-            print('already compiled')
-            test_logger.error('already compiled id %d' %self.id)
+            lgr.append('already compiled id %d' %self.id)
             return
         dest, preproc_config = create_directory(
             self, 'lastwill/neo-ico-contracts/*', 'crowdsale-config.json'
@@ -1698,19 +1653,16 @@ class ContractDetailsNeoICO(CommonDetails):
                 )
             ]
             preproc_params["constants"]["D_PREMINT_AMOUNT_" + str(ind)].append(0)
-            print('premint amount is', preproc_params["constants"]["D_PREMINT_AMOUNT_" + str(ind)], flush=True)
             preproc_params["constants"]["D_PREMINT_FREEZE_" + str(ind)] = str(th.freeze_date) if th.freeze_date else 0
 
         with open(preproc_config, 'w') as f:
             f.write(json.dumps(preproc_params))
         if os.system("/bin/bash -c 'cd {dest} && ./2_compile_crowdsale.sh'".format(dest=dest)):
             raise Exception('compiler error while deploying')
-        print('dest', dest, flush=True)
-        test_logger.info('dest %s' %dest)
+        lgr.append('dest %s' %dest)
         test_neo_ico_params(preproc_config, preproc_params, dest)
         with open(preproc_config, 'w') as f:
             f.write(json.dumps(preproc_params))
-
         with open(path.join(
                 dest,
                 'Crowdsale.Contract/bin/Release/netcoreapp2.0/publish/Crowdsale.Contract.abi.json'
@@ -1755,13 +1707,12 @@ class ContractDetailsNeoICO(CommonDetails):
     @blocking
     @postponable
     @logging
-    def deploy(self, contract_params='0710', return_type='05'):
+    def deploy(self, contract_params='0710', return_type='05', lgr=[]):
         self.compile()
         from_addr = NETWORKS[self.contract.network.name]['address']
         bytecode = self.neo_contract_crowdsale.bytecode
         neo_int = NeoInt(self.contract.network.name)
-        print('from address', from_addr)
-        test_logger.info('from address %s' % from_addr)
+        lgr.append('from address %s' % from_addr)
         details = {
             'name': 'WISH',
             'description': 'NEO smart contract',
@@ -1779,33 +1730,26 @@ class ContractDetailsNeoICO(CommonDetails):
             'details': details,
         }
         response = neo_int.mw_construct_deploy_tx(param_list)
-        print('construct response', response, flush=True)
+        lgr.append(('construct response', response))
         binary_tx = response['tx']
         contract_hash = response['hash']
-
         tx = ContractTransaction.DeserializeFromBufer(
             binascii.unhexlify(binary_tx)
         )
         tx = sign_neo_transaction(tx, binary_tx, from_addr)
-        print('after sign', tx.ToJson()['txid'], flush=True)
-        test_logger.info('after sign %s' % tx.ToJson()['txid'])
+        lgr.append('after sign %s' % tx.ToJson()['txid'])
         ms = StreamManager.GetStream()
         writer = BinaryWriter(ms)
         tx.Serialize(writer)
         ms.flush()
         signed_tx = ms.ToArray()
-        print('full tx:', flush=True)
-        print(signed_tx, flush=True)
-
+        lgr.append('full tx: %s' %signed_tx)
         result = neo_int.sendrawtransaction(signed_tx.decode())
-        print(result, flush=True)
+        lgr.append('result %s' %result)
         if not result:
             raise TxFail()
-        print('contract hash:', contract_hash)
-        test_logger.info('contract hash: %s' % contract_hash)
-        print('result of send raw transaction: ', result)
-        test_logger.info('result of send raw transaction: %s' % result)
-
+        lgr.append('contract hash: %s' % contract_hash)
+        lgr.append('result of send raw transaction: %s' % result)
         self.neo_contract_crowdsale.address = contract_hash
         self.neo_contract_crowdsale.tx_hash = tx.ToJson()['txid']
         self.neo_contract_crowdsale.save()
@@ -1814,7 +1758,7 @@ class ContractDetailsNeoICO(CommonDetails):
     @postponable
     @check_transaction
     @logging
-    def msg_deployed(self, message):
+    def msg_deployed(self, message, lgr=[]):
         neo_int = NeoInt(self.contract.network.name)
         from_addr = NETWORKS[self.contract.network.name]['address']
         param_list = {
@@ -1827,26 +1771,24 @@ class ContractDetailsNeoICO(CommonDetails):
         }
 
         response = neo_int.mw_construct_invoke_tx(param_list)
-
         binary_tx = response['tx']
 
         tx = ContractTransaction.DeserializeFromBufer(
             binascii.unhexlify(binary_tx)
         )
         tx = sign_neo_transaction(tx, binary_tx, from_addr)
-        print('after sign', tx.ToJson()['txid'])
+        lgr.append('after sign %s' %tx.ToJson()['txid'])
         ms = StreamManager.GetStream()
         writer = BinaryWriter(ms)
         tx.Serialize(writer)
         ms.flush()
         signed_tx = ms.ToArray()
-        print('signed_tx', signed_tx)
+        lgr.append('signed_tx %s' %signed_tx)
         result = neo_int.sendrawtransaction(signed_tx.decode())
-        print(result, flush=True)
+        lgr.append('result %s' %result)
         if not result:
             raise TxFail()
-        print('result of send raw transaction: ', result)
-
+        lgr.append('result of send raw transaction: %s' %result)
         assert(result)
         self.contract.save()
         return
@@ -1854,7 +1796,7 @@ class ContractDetailsNeoICO(CommonDetails):
     @postponable
     @check_transaction
     @logging
-    def initialized(self, message):
+    def initialized(self, message, lgr=[]):
         if self.contract.state != 'WAITING_FOR_DEPLOYMENT':
             return
 
@@ -1874,6 +1816,6 @@ class ContractDetailsNeoICO(CommonDetails):
             )
 
     @logging
-    def finalized(self, message):
+    def finalized(self, message, lgr=[]):
         self.contract.state = 'ENDED'
         self.contract.save()

@@ -103,17 +103,21 @@ def blocking(f):
 
 def logging(f):
     def wrapper(*args, **kwargs):
+        l = []
         info1 = ','.join([str(ar) for ar in args])
         info2 = ','.join([str(ar) for ar in kwargs])
-        str_info = 'CONTRACT LOGGING ' + str(f.__qualname__) + info1 + info2
-        test_logger.info(str_info)
+        l.append(str(f.__qualname__))
+        l.append(info1)
+        l.append(info2)
         try:
-            return f(*args, **kwargs)
+            return f(*args, **kwargs, lgr=l)
         except IndexError:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             trace_back = ' '. join(
                 traceback.format_exception(exc_type, exc_value,exc_traceback)
             )
-            test_logger.error('CONTRACT LOGGING ' + str(f.__qualname__) + str(exc_value) + trace_back)
-            raise
+            l.append(str(exc_value))
+            l.append(trace_back)
+        finally:
+            test_logger.info('CONTRACT LOGGING', extra={'message': l})
     return wrapper
