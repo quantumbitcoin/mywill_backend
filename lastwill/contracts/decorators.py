@@ -119,5 +119,5 @@ def logging(f):
             l.append(str(exc_value))
             l.append(trace_back)
         finally:
-            test_logger.info('CONTRACT LOGGING', extra={'message': l})
+            test_logger.info('CONTRACT LOGGING', extra={'info': l})
     return wrapper
