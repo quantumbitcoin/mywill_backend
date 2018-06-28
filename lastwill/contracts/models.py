@@ -302,6 +302,7 @@ class Contract(models.Model):
 
     @classmethod
     def get_details_model(self, contract_type):
+
         return contract_details_types[contract_type]['model']
 
 
