@@ -2,6 +2,9 @@ from lastwill.profile.models import SubSite
 from exchange_API import convert, to_wish
 from lastwill.consts import NET_DECIMALS
 from lastwill.payments.api import calculate_decimals, add_decimals
+import unittest
+import sys
+import ast
 
 
 def from_wish(curr, amount=1):
@@ -17,54 +20,103 @@ def convert_currency(amount, currency, site_id):
     return float(converted_amount)
 
 
-def recalculated_amount(amount, currency, site_id):
+def recalculate_amount(amount, currency, site_id):
     checked_amount = convert_currency(amount, currency, site_id)
     if 0.98 <= (amount / checked_amount) <= 1.02:
-        return amount
+        return True
     else:
-        return checked_amount
+        return False
 
 
-def check_payment(currency, amount, original_amount, original_site_id):
-    site_one_currencies = ['ETH', 'BTC', 'WISH', 'BNB']
-    site_two_currencies = ['ETH', 'BTC', 'EOS', 'EOSISH']
-    common_currencies = ['ETH', 'BTC']
-    amount = float(amount)
-    exchange_price = amount / original_amount
-    site_id = original_site_id
+class PaymentsTests(unittest.TestCase):
+    def setUp(self):
+        self.payment_values = []
+        self.currency = self.payment_values[0]
+        self.amount = float(self.payment_values[1])
+        self.original_amount = float(self.payment_values[2])
+        self.site_id = self.payment_values[3]
 
-    if currency in site_one_currencies and original_site_id != 1:
-        if currency not in common_currencies:
-            site_id = 1
+        self.site_one_currencies = ['ETH', 'BTC', 'WISH', 'BNB']
+        self.site_two_currencies = ['ETH', 'BTC', 'EOS', 'EOSISH']
+        self.common_currencies = ['ETH', 'BTC']
 
-    if currency in site_two_currencies and original_site_id != 2:
-        if currency not in common_currencies:
-            site_id = 2
+    def test_01(self):
+        print("check payment belongs to first site")
+        if self.currency in self.site_one_currencies:
+            if self.currency not in self.common_currencies:
+                assert(self.site_id  == 1)
+            else:
+                assert(self.site_id in list(range(1,3)))
 
-    if site_id == 1:
-        if currency in ['ETH', 'BNB']:
-            new_amount = recalculated_amount(original_amount, currency, site_id)
-        elif currency == 'BTC':
-            new_amount = recalculated_amount(original_amount, 'BTC', site_id)
-            new_amount *= (NET_DECIMALS['ETH'] / NET_DECIMALS['BTC'])
-        elif currency == 'WISH':
-            if amount != original_amount:
-                new_amount = original_amount
+    def test_02(self):
+        print("check payment belongs to second site")
+        if self.currency in self.site_two_currencies:
+            if self.currency not in self.common_currencies:
+                assert(self.site_id  == 2)
+            else:
+                assert(self.site_id in list(range(1,3)))
 
-    if site_id == 2:
-        if currency in ['ETH', 'BTC']:
-            new_amount = recalculated_amount(original_amount, currency, site_id)
-            new_amount = add_decimals(currency, new_amount)
-        elif currency == 'EOS':
-            new_amount = recalculated_amount(original_amount, currency, site_id)
-        elif currency == 'EOSISH':
-            if amount != original_amount:
-                new_amount = original_amount
+    def test_03(self):
+        if self.site_id != 1:
+            pass
+        else:
+            if self.currency not in ['ETH', 'BNB']:
+                pass
+            else:
+                self.assertTrue(recalculate_amount(self.original_amount, self.currency, self.site_id))
 
-    return {'checked_amount': new_amount, 'checked_site_id': site_id}
+    def test_04(self):
+        if self.site_id != 1:
+            pass
+        else:
+            if self.currency != 'BTC':
+                pass
+            else:
+                prechecked_amount = convert_currency(self.original_amount, 'BTC', self.site_id)
+                prechecked_amount *= (NET_DECIMALS['ETH'] / NET_DECIMALS['BTC'])
+                self.assertTrue(0.98 <= (self.amount / prechecked_amount) <= 1.02)
+
+    def test_05(self):
+        if self.site_id != 1:
+            pass
+        else:
+            if self.currency != 'WISH':
+                pass
+            else:
+                self.assertTrue(self.amount == self.original_amount)
+
+    def test_06(self):
+        if self.site_id != 2:
+            pass
+        else:
+            if self.currency not in ['ETH', 'BTC']:
+                pass
+            else:
+                prechecked_amount = convert_currency(self.original_amount, self.currency, self.site_id)
+                prechecked_amount = add_decimals(self.currency, prechecked_amount)
+                self.assertTrue(0.98 <= (self.amount / prechecked_amount) <= 1.02)
+
+    def test_07(self):
+        if self.site_id != 2:
+            pass
+        else:
+            if self.currency != 'EOS':
+                pass
+            else:
+                self.assertTrue(recalculate_amount(self.original_amount, self.currency, self.site_id))
+
+    def test_08(self):
+        if self.site_id != 1:
+            pass
+        else:
+            if self.currency != 'EOSISH':
+                pass
+            else:
+                self.assertTrue(self.amount == self.original_amount)
 
 
-
-
-
+if __name__ == "__main__":
+    input_values = ast.literal_eval(sys.argv[1])
+    PaymentsTests.payment_values = input_values
+    unittest.main()
 

@@ -10,7 +10,6 @@ from lastwill.profile.models import Profile, UserSiteBalance, SubSite
 from lastwill.settings import MY_WISH_URL, TRON_URL
 from lastwill.consts import NET_DECIMALS
 from exchange_API import to_wish, convert
-from lastwill.payments.api_tests import check_payment
 
 
 def create_payment(uid, tx, currency, amount, site_id):
@@ -33,25 +32,15 @@ def create_payment(uid, tx, currency, amount, site_id):
         negative_payment(user, -value, site_id)
     else:
         positive_payment(user, value, site_id, currency)
-    validated_values = check_payment(currency, value, amount, site_id)
-    # site = SubSite.objects.get(id=site_id)
-    site = SubSite.objects.get(id=validated_values['checked_site_id'])
+    site = SubSite.objects.get(id=site_id)
     InternalPayment(
         user_id=uid,
-        delta=validated_values['checked_amount'],
+        delta=value,
         tx_hash=tx,
         original_currency=currency,
         original_delta=str(amount),
         site=site
     ).save()
-    # InternalPayment(
-    #     user_id=uid,
-    #     delta=value, validated_values['checked_amount'],
-    #     tx_hash=tx,
-    #     original_currency=currency,
-    #     original_delta=str(amount),
-    #     site=site
-    # ).save()
     print('payment created')
 
 
