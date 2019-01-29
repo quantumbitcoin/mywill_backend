@@ -1,81 +1,8 @@
-#from lastwill.profile.models import SubSite
-#from exchange_API import convert, to_wish
-#from lastwill.consts import NET_DECIMALS
-#from lastwill.payments.api import calculate_decimals, add_decimals
+from exchange_API import convert, to_wish
+from lastwill.consts import NET_DECIMALS
+from lastwill.payments.api import calculate_decimals, add_decimals
 import unittest
 import sys
-import ast
-import json
-import requests
-
-NET_DECIMALS = {
-    'ETH': 10 ** 18,
-    'ETH_GAS_PRICE': 10 ** 9,
-    'EOS': 10 ** 4,
-    'WISH': 10 ** 18,
-    'EOSISH': 10 ** 4,
-    'BNB': 10 ** 18,
-    'BTC': 10 ** 8
-}
-
-def convert(fsym, tsyms):
-    eosish_factor = 1.0
-    revesre_convert = False
-    allowed = {'WISH', 'USD', 'ETH', 'EUR', 'BTC', 'NEO', 'EOS', 'EOSISH', 'BNB', 'TRX'}
-    if fsym == 'EOSISH' or tsyms == 'EOSISH':
-        eosish_factor = float(
-        requests.get('https://api.chaince.com/tickers/eosisheos/',
-                     headers={'accept-version': 'v1'}).json()['price']
-        )
-        print('eosish factor', eosish_factor, flush=True)
-        if fsym == 'EOSISH':
-            fsym = 'EOS'
-            if tsyms == fsym:
-                return {'EOS': eosish_factor}
-        else:
-            tsyms = 'EOS'
-            if tsyms == fsym:
-                return {'EOSISH': 1 / eosish_factor}
-            revesre_convert = True
-            eosish_factor = 1 / eosish_factor
-
-    if fsym not in allowed or any([x not in allowed for x in tsyms.split(',')]):
-        raise Exception('currency not allowed')
-    print(fsym, tsyms)
-    answer = json.loads(requests.get(
-        'http://127.0.0.1:5001/convert?fsym={fsym}&tsyms={tsyms}'.format(fsym=fsym, tsyms=tsyms)
-    ).content.decode())
-    print('currency_proxi answer', answer, flush=True)
-    if revesre_convert:
-        answer = {'EOSISH': answer['EOS']}
-        tsyms = 'EOSISH'
-    answer[tsyms] = answer[tsyms] * eosish_factor
-    return answer
-
-
-def to_wish(curr, amount=1):
-    return amount * (convert(curr, 'WISH')['WISH'])
-
-
-def calculate_decimals(currency, amount):
-    # count sum payments without decimals
-    if currency in ['ETH']:
-        amount = amount / NET_DECIMALS['ETH']
-    if currency in ['BTC']:
-        amount = amount / NET_DECIMALS['BTC']
-    if currency in ['EOS']:
-        amount = amount / NET_DECIMALS['EOS']
-    return amount
-
-
-def add_decimals(currency, amount):
-    # add decimals for eth, btc
-    if currency in ['ETH']:
-        amount = amount * NET_DECIMALS['ETH']
-    if currency in ['BTC']:
-        amount = amount * NET_DECIMALS['BTC']
-    return amount
-
 
 
 def from_wish(curr, amount=1):
