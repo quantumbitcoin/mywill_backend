@@ -174,7 +174,8 @@ def show_eth_token(request):
         'token_short_name': contract_details.token_short_name,
         'admin_address': contract_details.admin_address,
         'decimals': contract_details.decimals,
-        'token_type': contract_details.token_type
+        'token_type': contract_details.token_type,
+        'future_minting': contract_details.future_minting
     }
     log_additions(log_action_name, {'contract_id': int(request.data['contract_id'])})
     if contract_details.eth_contract_token and contract_details.eth_contract_token.tx_hash:
@@ -184,6 +185,12 @@ def show_eth_token(request):
     if contract_details.eth_contract_token and contract_details.eth_contract_token.compiler_version:
         answer['compiler_version'] = contract_details.eth_contract_token.compiler_version
         answer['name_contract'] = 'MainToken'
+    if contract_details.eth_contract_token and  contract.details.eth_contract_token.token_holders:
+        token_holder_serializer = TokenHolderSerializer()
+        answer['token_holders'] = [token_holder_serializer.to_representation(th)
+                                   for th in
+                                   contract_details.contract.tokenholder_set.order_by(
+                                        'id').all()]
     return JsonResponse(answer)
 
 
