@@ -55,7 +55,7 @@ def validate_token_name(name):
                               code=404)
 
 
-def validate_token_holders(holders_list, parm_futuremint):
+def validate_token_holders(holders_list):
     now = timezone.now().timestamp() + 600
     if len(holders_list) > 5:
         raise ValidationError({'result': 'Too many token holders'}, code=404)
@@ -63,12 +63,9 @@ def validate_token_holders(holders_list, parm_futuremint):
         check.is_address(th['address'])
         if th['amount'] < 0:
             raise ValidationError({'result: Negative token amount in holder'}, code=404)
-        if th['freeze_date'] is not None:
-            if parm_futuremint is not True:
-                raise ValidationError({'result: Freeze date cannot be specified if future minting is False'})
-            if th['freeze_date'] < now:
+        if th['freeze_date'] is not None and th['freeze_date'] < now:
                 raise ValidationError({'result': 'Freeze date in the past'}, code=404)
-        th['address'] = th['address'].lower
+        th['address'] = th['address'].lower()
     return holders_list
 
 
@@ -102,7 +99,7 @@ def create_eth_token(request):
     else:
         param_future_minting = False
     if 'token_holders' in request.data:
-        param_token_holders = validate_token_holders(request.data['token_holders'], param_future_minting)
+        param_token_holders = validate_token_holders(request.data['token_holders'])
     validate_token_name(request.data['token_name'])
     validate_token_short_name(request.data['token_short_name'])
     token_params = {
