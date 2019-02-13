@@ -68,6 +68,8 @@ def validate_token_holders(holders_list, parm_futuremint):
                 raise ValidationError({'result: Freeze date cannot be specified if future minting is False'})
             if th['freeze_date'] < now:
                 raise ValidationError({'result': 'Freeze date in the past'}, code=404)
+        th['address'] = th['address'].lower
+    return holders_list
 
 
 @api_view(http_method_names=['POST'])
@@ -100,7 +102,7 @@ def create_eth_token(request):
     else:
         param_future_minting = False
     if 'token_holders' in request.data:
-        validate_token_holders(request.data['token_holders'], param_future_minting)
+        param_token_holders = validate_token_holders(request.data['token_holders'], param_future_minting)
     validate_token_name(request.data['token_name'])
     validate_token_short_name(request.data['token_short_name'])
     token_params = {
@@ -110,7 +112,7 @@ def create_eth_token(request):
         'admin_address': request.data['admin_address'],
         'token_type': request.data['token_type'],
         'future_minting': param_future_minting,
-        'token_holders': request.data['token_holders']
+        'token_holders': param_token_holders
     }
     log_additions(log_action_name, token_params)
     Contract.get_details_model(
@@ -229,6 +231,13 @@ def edit_eth_token(request):
     if 'token_name' in request.data and request.data['token_name'] != '':
         validate_token_name(request.data['token_name'])
         contract_details.token_name = request.data['token_name']
+    if 'future_minting' in request.data:
+        if request.data['future_minting'] in [True, False]:
+            contract_details.future_minting = request.data['future_minting']
+        else:
+            raise ValidationError({'result': 'Future minting must be True or False'})
+    else:
+        contract_details.future_minting = False
     log_additions(log_action_name, request.data)
     contract_details.save()
     answer = {
@@ -241,7 +250,8 @@ def edit_eth_token(request):
         'token_short_name': contract_details.token_short_name,
         'admin_address': contract_details.admin_address,
         'decimals': contract_details.decimals,
-        'token_type': contract_details.token_type
+        'token_type': contract_details.token_type,
+        'future_minting': contract_details.future_minting
     }
     return Response(answer)
 
@@ -281,7 +291,6 @@ def delete_eth_token_contract(request):
     contract.invisible = True
     contract.save()
     return Response('Contract with id {id} deleted'.format(id=contract.id))
-
 
 
 @api_view(http_method_names=['POST'])
