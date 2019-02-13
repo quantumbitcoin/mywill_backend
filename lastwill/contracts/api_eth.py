@@ -13,6 +13,7 @@ from lastwill.profile.models import *
 from lastwill.settings import MY_WISH_URL
 from lastwill.deploy.models import *
 from lastwill.consts import *
+from django.utils import timezone
 
 
 def log_userinfo(api_action, token, user=None, id=None):
@@ -54,6 +55,21 @@ def validate_token_name(name):
                               code=404)
 
 
+def validate_token_holders(holders_list, parm_futuremint):
+    now = timezone.now().timestamp() + 600
+    if len(holders_list) > 5:
+        raise ValidationError({'result': 'Too many token holders'}, code=404)
+    for th in holders_list:
+        check.is_address(th['address'])
+        if th['amount'] < 0:
+            raise ValidationError({'result: Negative token amount in holder'}, code=404)
+        if th['freeze_date'] is not None:
+            if parm_futuremint is not True:
+                raise ValidationError({'result: Freeze date cannot be specified if future minting is False'})
+            if th['freeze_date'] < now:
+                raise ValidationError({'result': 'Freeze date in the past'}, code=404)
+
+
 @api_view(http_method_names=['POST'])
 def create_eth_token(request):
     '''
@@ -76,6 +92,15 @@ def create_eth_token(request):
         raise ValidationError({'result': 'Wrong decimals'}, code=404)
     if request.data['token_type'] not in ['ERC20', 'ERC223']:
         raise ValidationError({'result': 'Wrong token type'}, code=404)
+    if 'future_minting' in request.data:
+        if request.data['future_minting'] in [True, False]:
+            param_future_minting = request.data['future_minting']
+        else:
+            raise ValidationError({'result': 'Future minting must be True or False'})
+    else:
+        param_future_minting = False
+    if 'token_holders' in request.data:
+        validate_token_holders(request.data['token_holders'], param_future_minting)
     validate_token_name(request.data['token_name'])
     validate_token_short_name(request.data['token_short_name'])
     token_params = {
@@ -84,7 +109,8 @@ def create_eth_token(request):
         'token_short_name': request.data['token_short_name'],
         'admin_address': request.data['admin_address'],
         'token_type': request.data['token_type'],
-        'token_holders': []
+        'future_minting': param_future_minting,
+        'token_holders': request.data['token_holders']
     }
     log_additions(log_action_name, token_params)
     Contract.get_details_model(
