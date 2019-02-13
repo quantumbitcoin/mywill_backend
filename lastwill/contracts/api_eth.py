@@ -137,7 +137,9 @@ def create_eth_token(request):
         'network': contract.network.name,
         'network_id': contract.network.id,
         'decimals': contract_details.decimals,
-        'token_type': contract_details.token_type
+        'token_type': contract_details.token_type,
+        'future_minting': contract_details.future_minting,
+        'token_holders': contract_details.token_holders
     }
     return Response(answer)
 
