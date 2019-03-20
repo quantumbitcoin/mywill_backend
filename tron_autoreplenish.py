@@ -105,18 +105,14 @@ def check_and_freeze(account_params, tron_url):
 
 def convert_trx_resources(network):
     tron_url = 'http://%s:%s' % (str(NETWORKS[network]['host']), str(NETWORKS[network]['port']))
-    # account_parameters = {
-    #     "address": '41' + convert_address_to_hex(NETWORKS[network]['address'])[2:],
-    #     "private_key": NETWORKS[network]['private_key']
-    # }
-    account_main = {
-        "address": '41' + convert_address_to_hex(TRON_REPLENISH_ACCOUNT['address'])[2:],
-        "private_key": TRON_REPLENISH_ACCOUNT['private_key']
+    account_params = {
+        "address": '41' + convert_address_to_hex(NETWORKS[network]['address'])[2:],
+        "private_key": NETWORKS[network]['private_key']
     }
-    account_check = {
-        "address": '41' + convert_address_to_hex(TRON_REPLENISH_CHECK_ACCOUNT['address'])[2:],
-        "private_key": TRON_REPLENISH_CHECK_ACCOUNT['private_key']
+    account_params_check = {
+        "address": '41' + convert_address_to_hex(NETWORKS[network]['check_address'])[2:],
+        "private_key": NETWORKS[network]['check_private_key']
     }
 
-    check_and_freeze(account_main, tron_url)
-    check_and_freeze(account_check, tron_url)
+    check_and_freeze(account_params, tron_url)
+    check_and_freeze(account_params_check, tron_url)
